@@ -43,10 +43,13 @@ function Map() {
 function Tank(tx,ty) {
 	this.x = tx;
 	this.y = ty;
-	this.dx = 1; //direction
-    this.dy = 0; //direction
-    this.max_speed = 0.5; //current max speed
+    
+    //angle of tank
+    this.angle = 0; //in radians
+    
     this.speed = 0; //current moving speed
+    this.accel = 0.025; //acceleration rate
+    this.max_speed = 0.75; //current max speed
 	
 	this.turnRate = 0.025; //also depends on the framerate
     this.turnLeft = false; //turning left
@@ -56,11 +59,9 @@ function Tank(tx,ty) {
 	this.length = 40; 
     this.width = 30;
     
-	//angle of tank
-    this.angle = 0.0; //in radians
 
 	//angle of turret
-	this.turret = {}
+	this.turret = {};
     this.turret.angle = 0.0; //in radians
 
 	//length of turret
@@ -73,29 +74,25 @@ function Tank(tx,ty) {
 		//update the angle of the turret according to where the mouse is
 		this.turret.angle = Math.atan2(gs.pointerPosition[1]-this.y, gs.pointerPosition[0]-this.x);
 
-		//adjust speeed
-		this.x += (this.speed * this.dx);
-		this.y += (this.speed * this.dy);
+		// update our position based on our angle and speed
+		this.x = this.x + this.speed * Math.cos(this.angle);
+		this.y = this.y + this.speed * Math.sin(this.angle);
 
 		//if hitting east side
-		if(this.x > gs.clientWidth-5) {
-			this.x = gs.clientWidth - 5;
-			this.speed = 0;
+		if(this.x > gs.width-5) {
+			this.x = gs.width - 5;
 		}
 		//if hitting west side
 		if(this.x < 5) {
 			this.x = 5;
-			this.speed = 0;
 		}
 		//if hitting south side
-		if(this.y > gs.clientHeight-5) {
-			this.y = gs.clientHeight - 5;
-			this.speed = 0;
+		if(this.y > gs.height-5) {
+			this.y = gs.height - 5;
 		}
 		//if hitting north side
 		if(this.y < 5) {
 			this.y = 5;
-			this.speed = 0;
 		}
 	}
 	
@@ -155,13 +152,18 @@ function Tank(tx,ty) {
 		this.turnRight();
 	}
 	
-	this.keyDown_38 = function () {
-		this.speed = 1;
+	this.keyDown_87 = function () {
+		this.speed = this.max_speed;
 	}
 	
-	this.keyHeld_38 = function () {
-		if (this.speed < 3.0)
+    /* no acceleration right now 
+	this.keyHeld_87 = function () {
+		if (this.speed < this.max_speed)
 			this.speed += this.accel;
+	} */
+    
+	this.keyUp_87 = function () {
+		this.speed = 0;
 	}
 	
 	this.keyDown_32 = function () {
